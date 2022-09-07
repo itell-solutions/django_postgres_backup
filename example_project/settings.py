@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.postgres",
     "django_extensions",
+    "example_app",
     "django_postgres_backup",
 ]
 
@@ -73,13 +74,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "example_project.wsgi.application"
 
-_DEFAULT_DEMO_PASSWORD = "hid_d3n."
+DEFAULT_DEMO_PASSWORD = "hid_d3n."
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 _DEFAULT_POSTGRES_DATABASE = "dpb_postgres"
 _DEFAULT_POSTGRES_HOST = "localhost"
-_DEFAULT_POSTGRES_PASSWORD = _DEFAULT_DEMO_PASSWORD
+_DEFAULT_POSTGRES_PASSWORD = DEFAULT_DEMO_PASSWORD
 _DEFAULT_POSTGRES_PORT = "5444"
 _DEFAULT_POSTGRES_USERNAME = "postgres"
 DATABASES = {

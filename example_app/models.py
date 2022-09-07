@@ -2,5 +2,5 @@ from django.db import models
 
 
 # Create your models here.
-class Names(models.Model):
+class Cars(models.Model):
     name = models.CharField(max_length=200)

@@ -70,6 +70,7 @@ pytest-django = "^4.5.2"
 pytest-cov = "^3.0.0"
 pytest-xdist = "^2.5.0"
 pytest-order = "^1.0.1"
+pre-commit = "^2.20.0"
 
 [tool.poetry.urls]
 "Issue Tracker" = "https://github.com/itell-solutions/django_postgres_backup/issues"
