@@ -3,18 +3,14 @@ import os
 import subprocess
 from typing import Optional
 
-from django.contrib.auth.models import User
 from django.utils import timezone
 
 from django_postgres_backup.settings import BASE_DIR, DATABASE_HOST, DATABASE_PASSWORD, DATABASE_PORT
-from example_app.models import Cars
-from example_project.settings import DEMO_PASSWORD
 
 BACKUP_PATH = BASE_DIR / "backup"
 DEFAULT_DATABASE_BACKUP_FORMAT = "t"
 YYYY_MM_DD_HH_MM = f"{timezone.now().strftime('%Y-%m-%d_%H-%M')}"
 
-CARS_TO_CREATE = ["Audi", "Mercedes", "BMW"]
 ADMIN_USERNAME = "admin"
 
 
@@ -109,11 +105,3 @@ def run(command, shell=False):
     else:
         print(" ".join(command))
     subprocess.check_call(command, cwd=BASE_DIR, shell=shell)
-
-
-def makedemo():
-    if not User.objects.filter(username=ADMIN_USERNAME).exists():
-        print("Create super user")
-        User.objects.create_superuser(ADMIN_USERNAME, password=DEMO_PASSWORD)
-    print(f"Creating demo cars{CARS_TO_CREATE}")
-    Cars.objects.bulk_create(Cars(name=name) for name in CARS_TO_CREATE)
