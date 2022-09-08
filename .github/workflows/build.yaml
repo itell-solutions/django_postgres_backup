@@ -1,0 +1,83 @@
+# Continuous integration build for versdb.
+name: Build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8] # Same version as Ubuntu 20 LTS.
+    services:
+      postgres:
+        image: postgres:12 # Same version as Ubuntu 20 LTS.
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: "hid_d3n."
+          POSTGRES_DB: dpb_ci
+        ports:
+          - 5432:5432
+        # NOTE: Needed because the postgres container does not provide a health check.
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install psycopg2 dependencies
+        run: sudo apt-get install python3-dev python3-virtualenv libpq-dev
+      - name: Install localization dependencies
+        run: sudo apt-get install gettext
+      - name: Install graphviz
+        run: sudo apt-get install graphviz-dev
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r dev_requirements.txt
+      - name: Check migrations
+        run: |
+          python manage.py makemigrations --check
+      - name: Check translations
+        run: |
+          check_uncommitted_git_changes
+      - name: Run the test suite
+        run: |
+          pytest --verbose
+  check-style:
+    runs-on: ubuntu-latest
+    # Disable pre-commit check on main and production to prevent
+    # pull request merges to fail with don't commit to branch".
+    if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/production'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install pre-commit
+        run: |
+          sudo apt-get install python3
+          python -m pip install --upgrade pip
+          pip install pre-commit
+      - name: Load cached pre-commit
+        id: cached-pre-commit
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+      - name: Install pre-commit hooks
+        if: steps.cached-pre-commit.outputs.cache-hit != 'true'
+        run: pre-commit install --install-hooks
+      - name: Check coding style
+        run: pre-commit run --all-files
+  check-security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        run: |
+          sudo apt-get install python3
+          python -m pip install --upgrade pip
+      - name: Check safety
+        run: |
+          pip install safety
+          safety check -r requirements.txt -r dev_requirements.txt
