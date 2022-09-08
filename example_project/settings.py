@@ -9,18 +9,53 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
+import enum
 import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
+_ENVVAR_DPB_SECRET_KEY = "DPB_SECRET_KEY"
+_ENVVAR_DPB_ENVIRONMENT = "DPB_ENVIRONMENT"
+_ENVVAR_DPB_DEV_DEMO_PASSWORD = "DPB_DEV_DEMO_PASSWORD"
+_ENVVAR_DPB_POSTGRES_DATABASE = "DPB_POSTGRES_DATABASE"
+_ENVVAR_DPB_POSTGRES_HOST = "DPB_POSTGRES_HOST"
+_ENVVAR_DPB_POSTGRES_PASSWORD = "DPB_POSTGRES_PASSWORD"
+_ENVVAR_DPB_POSTGRES_PORT = "DPB_POSTGRES_PORT"
+_ENVVAR_DPB_POSTGRES_USERNAME = "DPB_POSTGRES_USERNAME"
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
+
+class Environment(enum.Enum):
+    CI = "ci"
+    LOCAL = "local"
+    TEST = "test"
+    PRODUCTION = "production"
+
+
+_ENVIRONMENT_TO_ALLOWED_HOSTS_MAP = {
+    Environment.CI: [],
+    Environment.LOCAL: [],
+    Environment.TEST: ["DPB.test.itell.solutions"],
+    Environment.PRODUCTION: ["TODO"],
+}
+
+try:
+    ENVIRONMENT = Environment(os.environ.get(_ENVVAR_DPB_ENVIRONMENT))
+except ValueError:
+    _environment_names = ", ".join(environment.value for environment in Environment)
+    raise ValueError(f"environment variable {_ENVVAR_DPB_ENVIRONMENT} must be set to one of: {_environment_names}")
+IS_LOCAL = ENVIRONMENT == Environment.LOCAL
+IS_CI = ENVIRONMENT == Environment.CI
+IS_TEST = ENVIRONMENT == Environment.TEST
+IS_PRODUCTION = ENVIRONMENT == Environment.PRODUCTION
+
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "-yw-+nj8%5-xdggrls$3y7b7l)o)4t692*$y9c+$x+as&3768c"
+_DEFAULT_SECRET_KEY = "django-insecure-not-a-secret" if IS_LOCAL else None
+SECRET_KEY = os.environ.get(_ENVVAR_DPB_SECRET_KEY, _DEFAULT_SECRET_KEY)
+if SECRET_KEY is None:
+    raise ValueError(f"environment variable {_ENVVAR_DPB_SECRET_KEY} must be set")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -74,23 +109,33 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "example_project.wsgi.application"
 
-DEFAULT_DEMO_PASSWORD = "hid_d3n."
+_DEFAULT_DEMO_PASSWORD = "hid_d3n."
+DEMO_PASSWORD = os.environ.get(_ENVVAR_DPB_DEV_DEMO_PASSWORD, _DEFAULT_DEMO_PASSWORD)
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-_DEFAULT_POSTGRES_DATABASE = "dpb_postgres"
+_DEFAULT_POSTGRES_DATABASE = "dpb_" + ENVIRONMENT.value
 _DEFAULT_POSTGRES_HOST = "localhost"
-_DEFAULT_POSTGRES_PASSWORD = DEFAULT_DEMO_PASSWORD
-_DEFAULT_POSTGRES_PORT = "5444"
+_DEFAULT_POSTGRES_PASSWORD = DEMO_PASSWORD if IS_CI or IS_LOCAL else None
+_DEFAULT_POSTGRES_PORT = "5444" if IS_LOCAL else "5432"
 _DEFAULT_POSTGRES_USERNAME = "postgres"
+_POSTGRES_DATABASE = os.environ.get(_ENVVAR_DPB_POSTGRES_DATABASE, _DEFAULT_POSTGRES_DATABASE)
+_POSTGRES_HOST = os.environ.get(_ENVVAR_DPB_POSTGRES_HOST, _DEFAULT_POSTGRES_HOST)
+_POSTGRES_PASSWORD = os.environ.get(_ENVVAR_DPB_POSTGRES_PASSWORD, _DEFAULT_POSTGRES_PASSWORD)
+
+if _POSTGRES_PASSWORD is None:
+    raise ValueError(f"environment variable {_ENVVAR_DPB_POSTGRES_PASSWORD} must be set")
+_POSTGRES_PORT = int(os.environ.get(_ENVVAR_DPB_POSTGRES_PORT, _DEFAULT_POSTGRES_PORT))
+_POSTGRES_USERNAME = os.environ.get(_ENVVAR_DPB_POSTGRES_USERNAME, _DEFAULT_POSTGRES_USERNAME)
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": _DEFAULT_POSTGRES_DATABASE,
-        "USER": _DEFAULT_POSTGRES_USERNAME,
-        "PASSWORD": _DEFAULT_POSTGRES_PASSWORD,
-        "HOST": _DEFAULT_POSTGRES_HOST,
-        "PORT": _DEFAULT_POSTGRES_PORT,
+        "NAME": _POSTGRES_DATABASE,
+        "USER": _POSTGRES_USERNAME,
+        "PASSWORD": _POSTGRES_PASSWORD,
+        "HOST": _POSTGRES_HOST,
+        "PORT": _POSTGRES_PORT,
     }
 }
 

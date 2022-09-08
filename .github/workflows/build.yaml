@@ -8,7 +8,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.8] # Same version as Ubuntu 20 LTS.
+        python-version: [3.8, 3.9]
+    env:
+      DPB_ENVIRONMENT: ci
+      DPB_SECRET_KEY: "not-a-secret"
     services:
       postgres:
         image: postgres:12 # Same version as Ubuntu 20 LTS.
