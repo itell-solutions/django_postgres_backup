@@ -21,8 +21,8 @@ TEST_CAR_NAME = "Audi"
 TEST_CREATE_DATABASE_SQL = f"create database {DATABASE_NAME};"
 TEST_CREATE_TABLE_CARS_SQL = "create table cars (id SERIAL PRIMARY KEY , name VARCHAR(255) NOT NULL);"
 TEST_SELECT_FROM_CARS_SQL = "select * from cars;"
-TEST_DROP_CARS_TABLE_SQL = "drop table cars;"
-TEST_DROP_DATABASE_SQL = f"drop database {DATABASE_NAME};"
+TEST_DROP_CARS_TABLE_IF_EXISTS_SQL = "drop table if exists cars;"
+TEST_DROP_DATABASE_IF_EXISTS_SQL = f"drop database if exists {DATABASE_NAME};"
 
 
 class BackupRestoreTest(unittest.TestCase):
@@ -38,6 +38,7 @@ class BackupRestoreTest(unittest.TestCase):
 
     def _setup_database(self):
         self._connect_without_database_name()
+        self.cursor.execute(TEST_DROP_DATABASE_IF_EXISTS_SQL)
         self.cursor.execute(TEST_CREATE_DATABASE_SQL)
         self.cursor.close()
         self.con.close()
@@ -52,6 +53,7 @@ class BackupRestoreTest(unittest.TestCase):
         )
         self.con.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
         self.cursor = self.con.cursor()
+        self.cursor.execute(TEST_DROP_CARS_TABLE_IF_EXISTS_SQL)
         self.cursor.execute(TEST_CREATE_TABLE_CARS_SQL)
 
     def _test_can_backup_and_restore_database(self):
@@ -97,9 +99,9 @@ class BackupRestoreTest(unittest.TestCase):
             self._test_can_backup_and_restore_database()
         finally:
             if self.con:
-                self.cursor.execute(TEST_DROP_CARS_TABLE_SQL)
+                self.cursor.execute(TEST_DROP_CARS_TABLE_IF_EXISTS_SQL)
                 self.cursor.close()
                 self.con.close()
                 self._connect_without_database_name()
-                self.cursor.execute(TEST_DROP_DATABASE_SQL)
+                self.cursor.execute(TEST_DROP_DATABASE_IF_EXISTS_SQL)
                 self.con.close()
