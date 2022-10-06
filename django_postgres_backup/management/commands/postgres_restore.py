@@ -1,11 +1,16 @@
 from django.core.management import BaseCommand
 
-from django_postgres_backup.common import BACKUP_PATH, DEFAULT_DATABASE_BACKUP_FORMAT, backup_file, restore_database
+from django_postgres_backup.common import (
+    DEFAULT_BACKUP_DIR,
+    DEFAULT_DATABASE_BACKUP_FORMAT,
+    backup_path,
+    restore_database,
+)
 from django_postgres_backup.settings import DATABASE_NAME, DATABASE_USER
 
 
 class Command(BaseCommand):
-    help = "Download bootstrap, build template css and copy bootstrap.bundle.min.js"
+    help = "Restore a backup for Postgresql."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -15,9 +20,13 @@ class Command(BaseCommand):
             default=DATABASE_NAME,
             help="database name to backup",
         )
-        parser.add_argument("--file", "-f", metavar="FILENAME")
-        parser.add_argument("--format", "-fo", metavar="FORMAT", default=DEFAULT_DATABASE_BACKUP_FORMAT)
-        parser.add_argument("--username", "-u", metavar="USERNAME", default=DATABASE_USER)
+        parser.add_argument(
+            "--name", "-f", metavar="NAME", help="name of the backup to restore from which to restore the databse"
+        )
+        parser.add_argument(
+            "--format", "-fo", metavar="FORMAT", default=DEFAULT_DATABASE_BACKUP_FORMAT, help="backup format type"
+        )
+        parser.add_argument("--username", "-u", metavar="USERNAME", default=DATABASE_USER, help="database username")
         parser.add_argument(
             "--clean",
             "-c",
@@ -30,21 +39,22 @@ class Command(BaseCommand):
             help="use IF EXISTS when objects are deleted",
         )
         parser.add_argument(
-            "--path",
-            "-p",
-            metavar="PATH",
-            default=BACKUP_PATH,
+            "--backup-dir",
+            "-b",
+            metavar="BACKUP_DIR",
+            default=DEFAULT_BACKUP_DIR,
+            help="directory where the backups are stored",
         )
 
     def handle(self, *args, **options):
         database_name = options["dbname"]
-        file_name = options["file"]
+        name = options["name"]
         database_format = options["format"]
         username = options["username"]
         clean = options["clean"]
         if_exists = options["if_exists"]
-        path = options["path"]
+        backup_dir = options["backup_dir"]
 
         restore_database(
-            clean, if_exists, database_name, database_format, username, backup_file(path, database_name, file_name)
+            clean, if_exists, database_name, database_format, username, backup_path(backup_dir, database_name, name)
         )

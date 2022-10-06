@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from django_postgres_backup.settings import BASE_DIR, DATABASE_HOST, DATABASE_PASSWORD, DATABASE_PORT
 
-BACKUP_PATH = BASE_DIR / "backup"
+DEFAULT_BACKUP_DIR = BASE_DIR / "backup"
 DEFAULT_DATABASE_BACKUP_FORMAT = "t"
 YYYY_MM_DD_HH_MM = f"{timezone.now().strftime('%Y-%m-%d_%H-%M')}"
 
@@ -17,13 +17,13 @@ ADMIN_USERNAME = "admin"
 def backup_and_cleanup_database(
     database_format: str,
     database_name: str,
-    file_name: str,
+    name: str,
     generation: int,
     username: str,
     path: str,
     is_sudo: bool = True,
 ):
-    file_name_with_timestamp = f"{file_name}-{YYYY_MM_DD_HH_MM}"
+    file_name_with_timestamp = f"{name}-{YYYY_MM_DD_HH_MM}"
     sudo_command = "sudo -S" if is_sudo else ""
     command = (
         f"{sudo_command} PGPASSWORD={DATABASE_PASSWORD} pg_dump --host={DATABASE_HOST} --port={DATABASE_PORT} "
@@ -32,7 +32,7 @@ def backup_and_cleanup_database(
     )
     run([command], True)
     delete_older_backup_files(
-        file_name,
+        name,
         generation,
         path,
     )
@@ -53,16 +53,16 @@ def delete_older_backup_files(
         os.remove(backup_file_to_delete)
 
 
-def backup_file(
-    path: str,
+def backup_path(
+    backup_path: str,
     database_name: str,
     file_name: Optional[str] = None,
-):
+) -> str:
     if file_name:
         file = file_name
     else:
         backup_glob_pattern = os.path.join(
-            path, f"{database_name}-20[0-9][0-9]-[0-1][0-9]-[0-3][0-9]_[0-2][0-9]-[0-6][0-9].sql.bz2"
+            backup_path, f"{database_name}-20[0-9][0-9]-[0-1][0-9]-[0-3][0-9]_[0-2][0-9]-[0-6][0-9].sql.bz2"
         )
         file = sorted(glob.glob(backup_glob_pattern), reverse=True)[0]
     print(f"Selecting recent backup {file}")
@@ -76,25 +76,26 @@ def restore_database(
     database_name: str,
     database_format: str,
     username: str,
-    file: str,
+    name: str,
     is_sudo: bool = True,
 ):
-    additional_commands = ""
+    additional_commands = []
     if clean:
-        additional_commands = "--clean"
+        additional_commands.append("--clean")
     if if_exists:
-        additional_commands = f"{additional_commands} --if-exists"
+        additional_commands.append("--if-exists")
 
     command = (
         f"PGPASSWORD={DATABASE_PASSWORD} pg_restore --host={DATABASE_HOST} --port={DATABASE_PORT} "
-        f"--username={username} --dbname={database_name} --format={database_format} {additional_commands}"
+        f"--username={username} --dbname={database_name} --format={database_format} "
+        f"{' '.join(additional_commands)}"
     )
 
     sudo_command = "sudo -S" if is_sudo else ""
-    if file.rsplit(".", 1)[-1] == "bz2":
-        command = f"{sudo_command} bzip2 -d -c {file} -k | {command}"
+    if name.rsplit(".", 1)[-1] == "bz2":
+        command = f"{sudo_command} bzip2 -d -c {name} -k | {command}"
     else:
-        command = f"{sudo_command} {command} {file}"
+        command = f"{sudo_command} {command} {name}"
 
     run([command], True)
 
@@ -104,4 +105,4 @@ def run(command, shell=False):
         print(command)
     else:
         print(" ".join(command))
-    subprocess.check_call(command, cwd=BASE_DIR, shell=shell)
+    subprocess.check_call(command, shell=shell)

@@ -1,11 +1,17 @@
+import os
+
 from django.core.management import BaseCommand
 
-from django_postgres_backup.common import BACKUP_PATH, DEFAULT_DATABASE_BACKUP_FORMAT, backup_and_cleanup_database, run
+from django_postgres_backup.common import (
+    DEFAULT_BACKUP_DIR,
+    DEFAULT_DATABASE_BACKUP_FORMAT,
+    backup_and_cleanup_database,
+)
 from django_postgres_backup.settings import DATABASE_NAME, DATABASE_USER, POSTGRES_BACKUP_GENERATIONS
 
 
 class Command(BaseCommand):
-    help = "Download bootstrap, build template css and copy bootstrap.bundle.min.js"
+    help = "Generates a backup for Postgresql and handles backup generations."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -15,26 +21,38 @@ class Command(BaseCommand):
             default=DATABASE_NAME,
             help="database name to backup",
         )
-        parser.add_argument("--file", "-f", metavar="FILENAME", default=DATABASE_NAME)
-        parser.add_argument("--format", "-fo", metavar="FORMAT", default=DEFAULT_DATABASE_BACKUP_FORMAT)
-        parser.add_argument("--username", "-u", metavar="USERNAME", default=DATABASE_USER)
-        parser.add_argument("--generation", "-g", metavar="GENERATION", default=POSTGRES_BACKUP_GENERATIONS, type=int)
         parser.add_argument(
-            "--path",
-            "-p",
-            metavar="PATH",
-            default=BACKUP_PATH,
+            "--name", "-n", metavar="NAME", default=DATABASE_NAME, help="name of the to be created backup"
+        )
+        parser.add_argument(
+            "--format", "-fo", metavar="FORMAT", default=DEFAULT_DATABASE_BACKUP_FORMAT, help="backup format type"
+        )
+        parser.add_argument("--username", "-u", metavar="USERNAME", default=DATABASE_USER, help="database username")
+        parser.add_argument(
+            "--generations",
+            "-g",
+            metavar="GENERATIONS",
+            default=POSTGRES_BACKUP_GENERATIONS,
+            type=int,
+            help="maximum number of backups to be kept saved",
+        )
+        parser.add_argument(
+            "--backup-dir",
+            "-b",
+            metavar="BACKUP_DIR",
+            default=DEFAULT_BACKUP_DIR,
+            help="directory where the backups are stored",
         )
 
     def handle(self, *args, **options):
         database_name = options["dbname"]
-        file_name = options["file"]
+        name = options["name"]
         database_format = options["format"]
         username = options["username"]
-        generation = options["generation"]
-        path = options["path"]
+        generation = options["generations"]
+        backup_dir = options["backup_dir"]
 
         print("Making backup directory if necessary.")
-        run(["mkdir", "-p", "backup"])
+        os.makedirs(backup_dir, exist_ok=True)
 
-        backup_and_cleanup_database(database_format, database_name, file_name, generation, username, path)
+        backup_and_cleanup_database(database_format, database_name, name, generation, username, backup_dir)

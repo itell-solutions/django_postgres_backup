@@ -32,7 +32,7 @@ repository = "https://github.com/itell-solutions/django_postgres_backup"
 keywords = ["backup", "django", "postgres", "restore", "sass",]
 classifiers = [
         "Development Status :: 5 - Production/Stable",
-        "Environment :: Web Environment",
+        "Environment :: Console",
         "Framework :: Django",
         "Framework :: Django :: 3",
         "Framework :: Django :: 4",
@@ -41,13 +41,11 @@ classifiers = [
         "Natural Language :: English",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
-        "Topic :: Internet :: WWW/HTTP",
-        "Topic :: Software Development",
-        "Topic :: Text Processing :: Markup :: HTML",
+        "Topic :: Database",
+        "Topic :: System :: Archiving :: Backup",
 ]
 packages = [
     { include = "django_postgres_backup" },

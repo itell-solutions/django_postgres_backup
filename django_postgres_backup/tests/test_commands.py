@@ -3,10 +3,10 @@ import unittest
 import psycopg2
 
 from django_postgres_backup.common import (
-    BACKUP_PATH,
+    DEFAULT_BACKUP_DIR,
     DEFAULT_DATABASE_BACKUP_FORMAT,
     backup_and_cleanup_database,
-    backup_file,
+    backup_path,
     restore_database,
 )
 from django_postgres_backup.settings import (
@@ -19,7 +19,7 @@ from django_postgres_backup.settings import (
 
 TEST_CAR_NAME = "Audi"
 TEST_CREATE_DATABASE_SQL = f"create database {DATABASE_NAME};"
-TEST_CREATE_TABLE_CARS_SQL = "create table cars (id SERIAL PRIMARY KEY , name VARCHAR(255) NOT NULL);"
+TEST_CREATE_TABLE_CARS_SQL = "create table cars (id serial primary key , name varchar(255) not null);"
 TEST_SELECT_FROM_CARS_SQL = "select * from cars;"
 TEST_DROP_CARS_TABLE_IF_EXISTS_SQL = "drop table if exists cars;"
 TEST_DROP_DATABASE_IF_EXISTS_SQL = f"drop database if exists {DATABASE_NAME};"
@@ -69,7 +69,7 @@ class BackupRestoreTest(unittest.TestCase):
             f"{DATABASE_NAME}",
             2,
             DATABASE_USER,
-            BACKUP_PATH,
+            DEFAULT_BACKUP_DIR,
             False,
         )
 
@@ -84,7 +84,7 @@ class BackupRestoreTest(unittest.TestCase):
             DATABASE_NAME,
             DEFAULT_DATABASE_BACKUP_FORMAT,
             DATABASE_USER,
-            backup_file(BACKUP_PATH, DATABASE_NAME),
+            backup_path(DEFAULT_BACKUP_DIR, DATABASE_NAME),
             False,
         )
 

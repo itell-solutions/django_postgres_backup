@@ -14,10 +14,10 @@ jobs:
       DPB_SECRET_KEY: "not-a-secret"
     services:
       postgres:
-        image: postgres:12 # Same version as Ubuntu 20 LTS.
+        image: postgres:14 # Same version as Ubuntu 22 LTS.
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: "hid_d3n."
+          POSTGRES_PASSWORD: "not_secret"
           POSTGRES_DB: dpb_ci
         ports:
           - 5432:5432

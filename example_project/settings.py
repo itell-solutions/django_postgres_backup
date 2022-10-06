@@ -109,7 +109,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "example_project.wsgi.application"
 
-_DEFAULT_DEMO_PASSWORD = "hid_d3n."
+_DEFAULT_DEMO_PASSWORD = "not-secret"
 DEMO_PASSWORD = os.environ.get(_ENVVAR_DPB_DEV_DEMO_PASSWORD, _DEFAULT_DEMO_PASSWORD)
 
 # Database
@@ -183,3 +183,5 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+POSTGRES_BACKUP_GENERATIONS = 3
