@@ -1,6 +1,8 @@
+import bz2
 import glob
 import os
 import subprocess
+from tempfile import NamedTemporaryFile
 from typing import Optional
 
 from django.utils import timezone
@@ -24,13 +26,25 @@ def backup_and_cleanup_database(
     is_sudo: bool = True,
 ):
     file_name_with_timestamp = f"{name}-{YYYY_MM_DD_HH_MM}"
-    sudo_command = "sudo -S" if is_sudo else ""
-    command = (
-        f"{sudo_command} PGPASSWORD={DATABASE_PASSWORD} pg_dump --host={DATABASE_HOST} --port={DATABASE_PORT} "
-        f"--username={username} --dbname={database_name} --format={database_format} | "
-        f"bzip2 -c > backup/{file_name_with_timestamp}.sql.bz2"
+    command = ["sudo", "-S"] if is_sudo else []
+    command.extend(
+        [
+            f"PGPASSWORD={DATABASE_PASSWORD}",
+            "pg_dump",
+            f"--host={DATABASE_HOST}",
+            f"--port={DATABASE_PORT}",
+            f"--username={username}",
+            f"--dbname={database_name}",
+            f"--format={database_format}",
+        ]
     )
-    run([command], True)
+
+    with NamedTemporaryFile() as tmp_file:
+        run(command, tmp_file)
+        tmp_file.seek(0)
+        with bz2.open(os.path.join(DEFAULT_BACKUP_DIR, f"{file_name_with_timestamp}.sql.bz2"), "wb") as compressed_file:
+            compressed_file.write(tmp_file.read())
+
     delete_older_backup_files(
         name,
         generation,
@@ -79,30 +93,38 @@ def restore_database(
     name: str,
     is_sudo: bool = True,
 ):
-    additional_commands = []
-    if clean:
-        additional_commands.append("--clean")
-    if if_exists:
-        additional_commands.append("--if-exists")
-
-    command = (
-        f"PGPASSWORD={DATABASE_PASSWORD} pg_restore --host={DATABASE_HOST} --port={DATABASE_PORT} "
-        f"--username={username} --dbname={database_name} --format={database_format} "
-        f"{' '.join(additional_commands)}"
+    command = ["sudo", "-S"] if is_sudo else []
+    command.extend(
+        [
+            f"PGPASSWORD={DATABASE_PASSWORD}",
+            "pg_restore",
+            f"--host={DATABASE_HOST}",
+            f"--port={DATABASE_PORT}",
+            f"--username={username}",
+            f"--dbname={database_name}",
+            f"--format={database_format}",
+        ]
     )
 
-    sudo_command = "sudo -S" if is_sudo else ""
+    if clean:
+        command.append("--clean")
+    if if_exists:
+        command.append("--if-exists")
     if name.rsplit(".", 1)[-1] == "bz2":
-        command = f"{sudo_command} bzip2 -d -c {name} -k | {command}"
+        with NamedTemporaryFile() as tmp_file:
+            with bz2.open(name, "rb") as compressed_file:
+                tmp_file.write(compressed_file.read())
+            tmp_file.seek(0)
+            run(command, input_file=tmp_file.read())
     else:
-        command = f"{sudo_command} {command} {name}"
+        with open(name, "rb") as backup_file:
+            run(command, input_file=backup_file.read())
 
-    run([command], True)
 
-
-def run(command, shell=False):
+def run(command, output_file: Optional[NamedTemporaryFile] = None, input_file: Optional[NamedTemporaryFile] = None):
     if isinstance(command, str):
         print(command)
     else:
         print(" ".join(command))
-    subprocess.check_call(command, shell=shell)
+    capture_output = False if output_file else True
+    subprocess.run(command, stdout=output_file, input=input_file, capture_output=capture_output, check=True)

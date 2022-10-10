@@ -1,3 +1,9 @@
+[![PyPI](https://img.shields.io/pypi/v/django_postgres_backup)](https://pypi.org/project/django_postgres_backup/)
+[![Python Versions](https://img.shields.io/pypi/pyversions/django_postgres_backup.svg)](https://www.python.org/downloads/)
+[![Build Status](https://github.com/itell-solutions/django_postgres_backup/actions/workflows/build.yaml/badge.svg)](https://github.com/itell-solutions/django_postgres_backup/actions/workflows/build.yaml)
+[![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![License](https://img.shields.io/github/license/itell-solutions/django_postgres_backup)](https://opensource.org/licenses/MIT)
+
 # Django managed commands to backup and restore PostgreSQL databases with multiple generations
 
 The `django_postgres_backup` Django module includes managed commands to back
@@ -68,4 +74,4 @@ Distributed under the
 the file `LICENSE`.
 
 The source code is available from
-<https://github.com/itell-solutions/django_html_xml_validator>.
+<https://github.com/itell-solutions/django_postgres_backup>.

@@ -25,7 +25,11 @@ class Command(BaseCommand):
             "--name", "-n", metavar="NAME", default=DATABASE_NAME, help="name of the to be created backup"
         )
         parser.add_argument(
-            "--format", "-fo", metavar="FORMAT", default=DEFAULT_DATABASE_BACKUP_FORMAT, help="backup format type"
+            "--format",
+            "-fo",
+            metavar="FORMAT",
+            default=DEFAULT_DATABASE_BACKUP_FORMAT,
+            help="accepts postgresql backup format types",
         )
         parser.add_argument("--username", "-u", metavar="USERNAME", default=DATABASE_USER, help="database username")
         parser.add_argument(
