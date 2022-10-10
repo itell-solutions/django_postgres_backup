@@ -23,21 +23,17 @@ def backup_and_cleanup_database(
     generation: int,
     username: str,
     path: str,
-    is_sudo: bool = True,
 ):
     file_name_with_timestamp = f"{name}-{YYYY_MM_DD_HH_MM}"
-    command = ["sudo", "-S"] if is_sudo else []
-    command.extend(
-        [
-            f"PGPASSWORD={DATABASE_PASSWORD}",
-            "pg_dump",
-            f"--host={DATABASE_HOST}",
-            f"--port={DATABASE_PORT}",
-            f"--username={username}",
-            f"--dbname={database_name}",
-            f"--format={database_format}",
-        ]
-    )
+    command = [
+        "pg_dump",
+        f"--host={DATABASE_HOST}",
+        f"--port={DATABASE_PORT}",
+        f"--username={username}",
+        f"--dbname={database_name}",
+        f"--format={database_format}",
+        "--no-password",
+    ]
 
     with NamedTemporaryFile() as tmp_file:
         run(command, tmp_file)
@@ -93,18 +89,15 @@ def restore_database(
     name: str,
     is_sudo: bool = True,
 ):
-    command = ["sudo", "-S"] if is_sudo else []
-    command.extend(
-        [
-            f"PGPASSWORD={DATABASE_PASSWORD}",
-            "pg_restore",
-            f"--host={DATABASE_HOST}",
-            f"--port={DATABASE_PORT}",
-            f"--username={username}",
-            f"--dbname={database_name}",
-            f"--format={database_format}",
-        ]
-    )
+    command = [
+        "pg_restore",
+        f"--host={DATABASE_HOST}",
+        f"--port={DATABASE_PORT}",
+        f"--username={username}",
+        f"--dbname={database_name}",
+        f"--format={database_format}",
+        "--no-password",
+    ]
 
     if clean:
         command.append("--clean")
@@ -127,4 +120,6 @@ def run(command, output_file: Optional[NamedTemporaryFile] = None, input_file: O
     else:
         print(" ".join(command))
     capture_output = False if output_file else True
-    subprocess.run(command, stdout=output_file, input=input_file, capture_output=capture_output, check=True)
+    env = os.environ.copy()
+    env["PGPASSWORD"] = DATABASE_PASSWORD
+    subprocess.run(command, stdout=output_file, input=input_file, capture_output=capture_output, check=True, env=env)

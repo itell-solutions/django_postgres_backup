@@ -70,7 +70,6 @@ class BackupRestoreTest(unittest.TestCase):
             2,
             DATABASE_USER,
             DEFAULT_BACKUP_DIR,
-            False,
         )
 
         self.cursor.execute(f"delete from cars where id ={rows[0][0]}")
