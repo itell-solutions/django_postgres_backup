@@ -11,42 +11,42 @@ from django_postgres_backup.settings import DATABASE_NAME, DATABASE_USER, POSTGR
 
 
 class Command(BaseCommand):
-    help = "Generates a backup for Postgresql and handles backup generations."
+    help = "Backup PostgreSQL database with multiple generations"
 
     def add_arguments(self, parser):
         parser.add_argument(
+            "--backup-dir",
+            "-b",
+            default=DEFAULT_BACKUP_DIR,
+            metavar="BACKUP_DIR",
+            help="directory where the backups are stored, default: %(default)s",
+        )
+        parser.add_argument(
             "--dbname",
             "-d",
-            metavar="DBNAME",
             default=DATABASE_NAME,
+            metavar="DBNAME",
             help="database name to backup",
         )
         parser.add_argument(
-            "--name", "-n", metavar="NAME", default=DATABASE_NAME, help="name of the to be created backup"
-        )
-        parser.add_argument(
             "--format",
-            "-fo",
-            metavar="FORMAT",
+            "-f",
             default=DEFAULT_DATABASE_BACKUP_FORMAT,
+            metavar="FORMAT",
             help="accepts postgresql backup format types",
         )
-        parser.add_argument("--username", "-u", metavar="USERNAME", default=DATABASE_USER, help="database username")
         parser.add_argument(
             "--generations",
             "-g",
-            metavar="GENERATIONS",
             default=POSTGRES_BACKUP_GENERATIONS,
+            metavar="GENERATIONS",
             type=int,
-            help="maximum number of backups to be kept saved",
+            help="maximum number of backups to be kept saved, default: %(default)d",
         )
         parser.add_argument(
-            "--backup-dir",
-            "-b",
-            metavar="BACKUP_DIR",
-            default=DEFAULT_BACKUP_DIR,
-            help="directory where the backups are stored",
+            "--name", "-n", default=DATABASE_NAME, metavar="NAME", help="name of the to be created backup"
         )
+        parser.add_argument("--username", "-u", default=DATABASE_USER, metavar="USERNAME", help="database username")
 
     def handle(self, *args, **options):
         database_name = options["dbname"]

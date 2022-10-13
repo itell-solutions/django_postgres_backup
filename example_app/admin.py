@@ -1,9 +1,9 @@
 from django.contrib import admin
 
-from example_app.models import Cars
+from example_app.models import Car
 
 
-@admin.register(Cars)
-class CarsAdmin(admin.ModelAdmin):
+@admin.register(Car)
+class CarAdmin(admin.ModelAdmin):
     list_display = ("name",)
     fields = ("name",)

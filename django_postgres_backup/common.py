@@ -35,11 +35,11 @@ def backup_and_cleanup_database(
         "--no-password",
     ]
 
-    with NamedTemporaryFile() as tmp_file:
-        run(command, tmp_file)
-        tmp_file.seek(0)
+    with NamedTemporaryFile() as database_dump_file:
+        run(command, database_dump_file)
+        database_dump_file.seek(0)
         with bz2.open(os.path.join(DEFAULT_BACKUP_DIR, f"{file_name_with_timestamp}.sql.bz2"), "wb") as compressed_file:
-            compressed_file.write(tmp_file.read())
+            compressed_file.write(database_dump_file.read())
 
     delete_older_backup_files(
         name,
@@ -119,7 +119,7 @@ def run(command, output_file: Optional[NamedTemporaryFile] = None, input_file: O
         print(command)
     else:
         print(" ".join(command))
-    capture_output = False if output_file else True
+    capture_output = output_file is None
     env = os.environ.copy()
     env["PGPASSWORD"] = DATABASE_PASSWORD
     subprocess.run(command, stdout=output_file, input=input_file, capture_output=capture_output, check=True, env=env)

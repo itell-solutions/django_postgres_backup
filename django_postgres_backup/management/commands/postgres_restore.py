@@ -10,27 +10,16 @@ from django_postgres_backup.settings import DATABASE_NAME, DATABASE_USER
 
 
 class Command(BaseCommand):
-    help = "Restore a backup for Postgresql."
+    help = "Restore a backup for PostgreSQL."
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--dbname",
-            "-d",
-            metavar="DBNAME",
-            default=DATABASE_NAME,
-            help="database name to backup",
+            "--backup-dir",
+            "-b",
+            default=DEFAULT_BACKUP_DIR,
+            metavar="BACKUP_DIR",
+            help="directory where the backups are stored, default: %(default)s",
         )
-        parser.add_argument(
-            "--name", "-f", metavar="NAME", help="name of the backup to restore from which to restore the databse"
-        )
-        parser.add_argument(
-            "--format",
-            "-fo",
-            metavar="FORMAT",
-            default=DEFAULT_DATABASE_BACKUP_FORMAT,
-            help="accepts postgresql backup format types",
-        )
-        parser.add_argument("--username", "-u", metavar="USERNAME", default=DATABASE_USER, help="database username")
         parser.add_argument(
             "--clean",
             "-c",
@@ -38,17 +27,29 @@ class Command(BaseCommand):
             help="delete database objects before recovery",
         )
         parser.add_argument(
-            "--if-exists",
-            action="store_true",
-            help="use IF EXISTS when objects are deleted",
+            "--dbname",
+            "-d",
+            default=DATABASE_NAME,
+            metavar="DBNAME",
+            help="database name to backup",
         )
         parser.add_argument(
-            "--backup-dir",
-            "-b",
-            metavar="BACKUP_DIR",
-            default=DEFAULT_BACKUP_DIR,
-            help="directory where the backups are stored",
+            "--format",
+            "-f",
+            default=DEFAULT_DATABASE_BACKUP_FORMAT,
+            metavar="FORMAT",
+            help="accepts postgresql backup format types",
         )
+        parser.add_argument(
+            "--if-exists",
+            "i",
+            action="store_true",
+            help="remove possibly existing database objects before restoring them",
+        )
+        parser.add_argument(
+            "--name", "-n", metavar="NAME", help="name of the backup to restore from which to restore the databse"
+        )
+        parser.add_argument("--username", "-u", default=DATABASE_USER, metavar="USERNAME", help="database username")
 
     def handle(self, *args, **options):
         database_name = options["dbname"]
