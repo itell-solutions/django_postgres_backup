@@ -84,7 +84,6 @@ class BackupRestoreTest(unittest.TestCase):
             DEFAULT_DATABASE_BACKUP_FORMAT,
             DATABASE_USER,
             backup_path(DEFAULT_BACKUP_DIR, DATABASE_NAME),
-            False,
         )
 
         self.cursor.execute(TEST_SELECT_FROM_CARS_SQL)

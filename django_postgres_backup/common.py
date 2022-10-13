@@ -27,11 +27,16 @@ def backup_and_cleanup_database(
     file_name_with_timestamp = f"{name}-{YYYY_MM_DD_HH_MM}"
     command = [
         "pg_dump",
-        f"--host={DATABASE_HOST}",
-        f"--port={DATABASE_PORT}",
-        f"--username={username}",
-        f"--dbname={database_name}",
-        f"--format={database_format}",
+        "--host",
+        DATABASE_HOST,
+        "--port",
+        str(DATABASE_PORT),
+        "--username",
+        username,
+        "--dbname",
+        database_name,
+        "--format",
+        database_format,
         "--no-password",
     ]
 
@@ -87,16 +92,19 @@ def restore_database(
     database_format: str,
     username: str,
     name: str,
-    is_sudo: bool = True,
 ):
     command = [
         "pg_restore",
-        f"--host={DATABASE_HOST}",
-        f"--port={DATABASE_PORT}",
-        f"--username={username}",
-        f"--dbname={database_name}",
-        f"--format={database_format}",
-        "--no-password",
+        "--host",
+        DATABASE_HOST,
+        "--port",
+        str(DATABASE_PORT),
+        "--username",
+        username,
+        "--dbname",
+        database_name,
+        "--format",
+        database_format,
     ]
 
     if clean:

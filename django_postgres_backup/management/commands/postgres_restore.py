@@ -42,7 +42,7 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             "--if-exists",
-            "i",
+            "-i",
             action="store_true",
             help="remove possibly existing database objects before restoring them",
         )
