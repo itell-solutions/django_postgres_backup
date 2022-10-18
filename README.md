@@ -26,7 +26,8 @@ poetry add django_postgres_backup
 
 ## Usage
 
-To add validation to your project, add it to `settings.INSTALLED_APPS`.
+To add the backup related managed commands to your project, add it to
+`settings.INSTALLED_APPS`.
 
 ```python
 INSTALLED_APPS = [
@@ -50,7 +51,7 @@ python manage.py postgres_backup
 You can clean and restore a whole database with all the tables and data
 
 ```bash
-python manage.py postgres_backup --clean --if-exists
+python manage.py postgres_restore --clean --if-exists
 ```
 
 ## Configuration
@@ -63,7 +64,7 @@ POSTGRES_BACKUP_GENERATIONS = 3
 
 ## Limitations
 
-- Backup and restore works only with postgresql.
+Backup and restore works only with postgresql.
 
 ## License
 

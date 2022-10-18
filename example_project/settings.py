@@ -9,7 +9,6 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-import enum
 import os
 from pathlib import Path
 
@@ -26,36 +25,8 @@ _ENVVAR_DPB_POSTGRES_PORT = "DPB_POSTGRES_PORT"
 _ENVVAR_DPB_POSTGRES_USERNAME = "DPB_POSTGRES_USERNAME"
 
 
-class Environment(enum.Enum):
-    CI = "ci"
-    LOCAL = "local"
-    TEST = "test"
-    PRODUCTION = "production"
-
-
-_ENVIRONMENT_TO_ALLOWED_HOSTS_MAP = {
-    Environment.CI: [],
-    Environment.LOCAL: [],
-    Environment.TEST: ["DPB.test.itell.solutions"],
-    Environment.PRODUCTION: ["TODO"],
-}
-
-try:
-    ENVIRONMENT = Environment(os.environ.get(_ENVVAR_DPB_ENVIRONMENT))
-except ValueError:
-    _environment_names = ", ".join(environment.value for environment in Environment)
-    raise ValueError(f"environment variable {_ENVVAR_DPB_ENVIRONMENT} must be set to one of: {_environment_names}")
-IS_LOCAL = ENVIRONMENT == Environment.LOCAL
-IS_CI = ENVIRONMENT == Environment.CI
-IS_TEST = ENVIRONMENT == Environment.TEST
-IS_PRODUCTION = ENVIRONMENT == Environment.PRODUCTION
-
-
 # SECURITY WARNING: keep the secret key used in production secret!
-_DEFAULT_SECRET_KEY = "django-insecure-not-a-secret" if IS_LOCAL else None
-SECRET_KEY = os.environ.get(_ENVVAR_DPB_SECRET_KEY, _DEFAULT_SECRET_KEY)
-if SECRET_KEY is None:
-    raise ValueError(f"environment variable {_ENVVAR_DPB_SECRET_KEY} must be set")
+SECRET_KEY = "django-insecure-not-a-secret"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -114,10 +85,10 @@ DEMO_PASSWORD = os.environ.get(_ENVVAR_DPB_DEV_DEMO_PASSWORD, _DEFAULT_DEMO_PASS
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-_DEFAULT_POSTGRES_DATABASE = "dpb_" + ENVIRONMENT.value
+_DEFAULT_POSTGRES_DATABASE = "dpb"
 _DEFAULT_POSTGRES_HOST = "localhost"
-_DEFAULT_POSTGRES_PASSWORD = DEMO_PASSWORD if IS_CI or IS_LOCAL else None
-_DEFAULT_POSTGRES_PORT = "5444" if IS_LOCAL else "5432"
+_DEFAULT_POSTGRES_PASSWORD = DEMO_PASSWORD
+_DEFAULT_POSTGRES_PORT = "5444"
 _DEFAULT_POSTGRES_USERNAME = "postgres"
 _POSTGRES_DATABASE = os.environ.get(_ENVVAR_DPB_POSTGRES_DATABASE, _DEFAULT_POSTGRES_DATABASE)
 _POSTGRES_HOST = os.environ.get(_ENVVAR_DPB_POSTGRES_HOST, _DEFAULT_POSTGRES_HOST)
