@@ -1,0 +1,3 @@
+# Ignore Django templates which otherwise prettier would destroy by inserting
+# syntactically invalid new lines.
+*.html

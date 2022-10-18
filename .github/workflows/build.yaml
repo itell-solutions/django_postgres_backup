@@ -1,0 +1,76 @@
+# Continuous integration build for versdb.
+name: Build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9]
+    env:
+      DPB_ENVIRONMENT: ci
+      DPB_SECRET_KEY: "not-a-secret"
+    services:
+      postgres:
+        image: postgres:14 # Same version as Ubuntu 22 LTS.
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: "not-secret"
+          POSTGRES_DB: dpb_ci
+        ports:
+          - 5432:5432
+        # NOTE: Needed because the postgres container does not provide a health check.
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v2
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: |
+          poetry install --no-interaction
+      - name: Make migrations
+        run: |
+          poetry run python manage.py makemigrations
+      - name: Run the test suite
+        run: |
+          poetry run pytest
+
+  check-style:
+    runs-on: ubuntu-latest
+    # Disable pre-commit check on main and production to prevent
+    # pull request merges to fail with don't commit to branch".
+    if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/production'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install pre-commit
+        run: |
+          sudo apt-get install python3
+          python -m pip install --upgrade pip
+          pip install pre-commit
+      - name: Load cached pre-commit
+        id: cached-pre-commit
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+      - name: Install pre-commit hooks
+        if: steps.cached-pre-commit.outputs.cache-hit != 'true'
+        run: pre-commit install --install-hooks
+      - name: Check coding style
+        run: pre-commit run --all-files
