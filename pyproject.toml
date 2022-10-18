@@ -22,19 +22,18 @@ skip_glob = "venv"
 
 [tool.poetry]
 name = "django_postgres_backup"
-version = "0.1.0"
-description = "TODO"
+version = "1.0.0"
+description = "Django managed commands to back up and restore a PostgreSQL database with multiple backup generations."
 authors = ["ITELL.SOLUTIONS GmbH"]
 readme = "README.md"
 license = "MIT"
 homepage = "https://github.com/itell-solutions/django_postgres_backup"
 repository = "https://github.com/itell-solutions/django_postgres_backup"
-keywords = ["backup", "django", "postgres", "restore", "sass",]
+keywords = ["backup", "django", "postgres", "restore",]
 classifiers = [
         "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
         "Framework :: Django",
-        "Framework :: Django :: 3",
         "Framework :: Django :: 4",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
