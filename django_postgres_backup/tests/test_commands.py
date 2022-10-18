@@ -26,33 +26,41 @@ TEST_DROP_DATABASE_IF_EXISTS_SQL = f"drop database if exists {DATABASE_NAME};"
 
 
 class BackupRestoreTest(unittest.TestCase):
+    def setUp(self):
+        self.connection = None
+        self.cursor = None
+
+    def tearDown(self):
+        self.connection = None
+        self.cursor = None
+
     def _connect_without_database_name(self):
-        self.con = psycopg2.connect(
+        self.connection = psycopg2.connect(
             host=DATABASE_HOST,
             user=DATABASE_USER,
             password=DATABASE_PASSWORD,
             port=DATABASE_PORT,
         )
-        self.con.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-        self.cursor = self.con.cursor()
+        self.connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+        self.cursor = self.connection.cursor()
 
     def _setup_database(self):
         self._connect_without_database_name()
         self.cursor.execute(TEST_DROP_DATABASE_IF_EXISTS_SQL)
         self.cursor.execute(TEST_CREATE_DATABASE_SQL)
         self.cursor.close()
-        self.con.close()
+        self.connection.close()
 
         # Connect again but with newly created database.
-        self.con = psycopg2.connect(
+        self.connection = psycopg2.connect(
             dbname=DATABASE_NAME,
             host=DATABASE_HOST,
             user=DATABASE_USER,
             password=DATABASE_PASSWORD,
             port=DATABASE_PORT,
         )
-        self.con.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-        self.cursor = self.con.cursor()
+        self.connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+        self.cursor = self.connection.cursor()
         self.cursor.execute(TEST_DROP_CARS_TABLE_IF_EXISTS_SQL)
         self.cursor.execute(TEST_CREATE_TABLE_CARS_SQL)
 
@@ -96,10 +104,10 @@ class BackupRestoreTest(unittest.TestCase):
             self._setup_database()
             self._test_can_backup_and_restore_database()
         finally:
-            if self.con:
+            if self.connection:
                 self.cursor.execute(TEST_DROP_CARS_TABLE_IF_EXISTS_SQL)
                 self.cursor.close()
-                self.con.close()
+                self.connection.close()
                 self._connect_without_database_name()
                 self.cursor.execute(TEST_DROP_DATABASE_IF_EXISTS_SQL)
-                self.con.close()
+                self.connection.close()
