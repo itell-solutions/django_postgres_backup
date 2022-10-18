@@ -10,7 +10,6 @@ jobs:
       matrix:
         python-version: [3.8, 3.9]
     env:
-      DPB_ENVIRONMENT: ci
       DPB_SECRET_KEY: "not-a-secret"
     services:
       postgres:
@@ -18,7 +17,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: "not-secret"
-          POSTGRES_DB: dpb_ci
+          POSTGRES_DB: "dpb"
         ports:
           - 5432:5432
         # NOTE: Needed because the postgres container does not provide a health check.
