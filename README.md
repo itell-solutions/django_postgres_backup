@@ -1,4 +1,4 @@
-[![PyPI](https://img.shields.io/pypi/v/django_postgres_backup)](https://pypi.org/project/django_postgres_backup/)
+
 [![Python Versions](https://img.shields.io/pypi/pyversions/django_postgres_backup.svg)](https://www.python.org/downloads/)
 [![Build Status](https://github.com/itell-solutions/django_postgres_backup/actions/workflows/build.yaml/badge.svg)](https://github.com/itell-solutions/django_postgres_backup/actions/workflows/build.yaml)
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
