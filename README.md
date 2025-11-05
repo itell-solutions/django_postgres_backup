@@ -4,6 +4,7 @@
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![License](https://img.shields.io/github/license/itell-solutions/django_postgres_backup)](https://opensource.org/licenses/MIT)
 
+# Project is deprecated and no longer supported
 # Django managed commands to backup and restore PostgreSQL databases with multiple generations
 
 The `django_postgres_backup` Django module includes managed commands to back
