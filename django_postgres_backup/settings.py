@@ -33,6 +33,7 @@ if DATABASE_PASSWORD is None:
     raise ValueError("'PASSWORD' must be defined in 'default'")
 
 DEFAULT_POSTGRES_BACKUP_GENERATIONS = 3
+DEFAULT_POSTGRES_BACKUP_DIR = BASE_DIR / "backup"
 POSTGRES_BACKUP_GENERATIONS = (
     getattr(settings, "POSTGRES_BACKUP_GENERATIONS", None)
     if getattr(settings, "POSTGRES_BACKUP_GENERATIONS", None)
@@ -40,3 +41,8 @@ POSTGRES_BACKUP_GENERATIONS = (
 )
 if POSTGRES_BACKUP_GENERATIONS < 1:
     raise ValueError("'POSTGRES_BACKUP_GENERATIONS' must be defined at lest 1.")
+POSTGRES_BACKUP_DIR = (
+    getattr(settings, "POSTGRES_BACKUP_DIR", None)
+    if getattr(settings, "POSTGRES_BACKUP_DIR", None)
+    else DEFAULT_POSTGRES_BACKUP_DIR
+)

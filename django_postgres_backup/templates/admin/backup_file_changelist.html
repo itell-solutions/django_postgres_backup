@@ -1,0 +1,49 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+<div id="content-main">
+    <div class="module filtered" id="changelist">
+        <div style="padding: 10px 0;">
+            <form method="post">
+                {% csrf_token %}
+                <input type="submit" name="_backup" value="Backup Now" class="default" style="float: right; margin-right: 10px;"/>
+            </form>
+        </div>
+        <div class="results">
+            <table id="result_list">
+                <thead>
+                    <tr>
+                        <th scope="col">
+                            <div class="text">{% trans 'Filename' %}</div>
+                        </th>
+                        <th scope="col">
+                            <div class="text">{% trans 'Date' %}</div>
+                        </th>
+                        <th scope="col">
+                            <div class="text">{% trans 'Size' %}</div>
+                        </th>
+                        <th scope="col">
+                            <div class="text">{% trans 'Actions' %}</div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for backup in backups %}
+                    <tr class="{% cycle 'row1' 'row2' %}">
+                        <td>{{ backup.filename }}</td>
+                        <td>{{ backup.date }}</td>
+                        <td>{{ backup.size }}</td>
+                        <td>{{ backup.download|safe }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4">{% trans 'No backup files found.' %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
